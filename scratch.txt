@@ -1,0 +1,1 @@
+EMAIL=heather@heatheradels.com PASSWORD=bunnymuffin scripts/sign-up.sh
