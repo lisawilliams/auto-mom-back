@@ -3,7 +3,7 @@ Scaffold for 'mom'
 ```bin/rails generate scaffold mom given_name:string family_name:string```
 
 
-Scaffold for 'kid'
+DONE Scaffold for 'kid'
 
 ```bin/rails generate scaffold kid given_name:string family_name:string```
 
