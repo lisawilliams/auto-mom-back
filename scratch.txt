@@ -1,1 +1,4 @@
 EMAIL=heather@heatheradels.com PASSWORD=bunnymuffin scripts/sign-up.sh
+
+
+bin/rails generate migration AddKidToUser user:references
