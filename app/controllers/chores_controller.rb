@@ -1,10 +1,10 @@
-class ChoresController < ApplicationController
+class ChoresController < OpenReadController
   before_action :set_chore, only: [:show, :update, :destroy]
 
   # GET /chores
   def index
-    @chores = Chore.all
-
+    # @chores = Chore.all
+    @chores = current_user.chores
     render json: @chores
   end
 
@@ -15,7 +15,9 @@ class ChoresController < ApplicationController
 
   # POST /chores
   def create
-    @chore = Chore.new(chore_params)
+    # @chore = Chore.new(chore_params)
+
+    @chore = current_user.chores.build(chore_params)
 
     if @chore.save
       render json: @chore, status: :created, location: @chore
