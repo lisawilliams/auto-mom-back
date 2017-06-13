@@ -1,300 +1,115 @@
-[![General Assembly Logo](https://camo.githubusercontent.com/1a91b05b8f4d44b5bbfb83abac2b0996d8e26c92/687474703a2f2f692e696d6775722e636f6d2f6b6538555354712e706e67)](https://generalassemb.ly/education/web-development-immersive)
+# Auto-Mom
 
-# rails-api-template
+Auto-Mom is a chore reminder system for kids and their grownups.
 
-A template for starting projects with `rails-api`. Includes authentication.
+As an adult, remembering all the things you need to do -- and all the things
+your kids need to do -- takes up a lot of valuable mental space.
 
-At the beginning of each cohort, update the versions in [`Gemfile`](Gemfile).
+As a kid, getting nagged by a parent is really just the worst.
 
-## Dependencies
+AutoMom reduces these two problems so kids and grownups can use their newly-freed-up
+mental space for more important things, like choosing which fandom to get into
+as a family. Buffy? Dr. Who? With AutoMom, you decide, because you're not
+wasting time figuring out who does what when.
 
-Install with `bundle install`.
+## What AutoMom Does And How It Works
 
--   [`rails-api`](https://github.com/rails-api/rails-api)
--   [`rails`](https://github.com/rails/rails)
--   [`active_model_serializers`](https://github.com/rails-api/active_model_serializers)
--   [`ruby`](https://www.ruby-lang.org/en/)
--   [`postgres`](http://www.postgresql.org)
+AutoMom is a client-server application with a Javascript front end and a Rails backend. The front end communicates with the server via an API.
 
-Until Rails 5 is released, this template should follow the most recent released
-version of Rails 4, as well as track `master` branches for `rails-api` and
-`active_model_serializers`.
+## The AutoMom Front End (Client)
 
-## Installation
+The front end is written in Javascript and makes use of jQuery, AJAX,
+Bootstrap, and Handlebars.js.
 
-1.  [Download](../../archive/master.zip) this template.
-1.  Unzip and rename the template directory.
-1.  Empty [`README.md`](README.md) and fill with your own content.
-1.  Move into the new project and `git init`.
-1.  Install dependencies with `bundle install`.
-1.  Rename your app module in `config/application.rb` (change
-    `RailsApiTemplate`).
-1.  Rename your project database in `config/database.yml` (change
-    `'rails-api-template'`).
-1.  Create a `.env` for sensitive settings (`touch .env`).
-1.  Generate new `development` and `test` secrets (`bundle exec rake secret`).
-1.  Store them in `.env` with keys `SECRET_KEY_BASE_<DEVELOPMENT|TEST>`
-    respectively.
-1.  In order to make requests to your deployed API, you will need to set
-    `SECRET_KEY_BASE` in the environment of the production API (using `heroku
-    config:set` or the Heroku dashboard).
-1.  In order to make requests from your deployed client application, you will
-    need to set `CLIENT_ORIGIN` in the environment of the production API (e.g.
-    `heroku config:set CLIENT_ORIGIN https://<github-username>.github.io`).
-1.  Setup your database with `bin/rake db:nuke_pave` or `bundle exec rake
-    db:nuke_pave`.
-1.  Run the API server with `bin/rails server` or `bundle exec rails server`.
+Handlebars.js is used to manage the display of chores to users, and Bootstrap
+is used to both nicely tile these across the page -- or organize them into one
+neat column for use on mobile devices. AutoMom communicates with a server
+via an API, making requests to get, post, update, or delete chores. The front end
+also makes request to the server for auth functions (sign up, sign in,
+sign out, change password). It is a fully functional CRUD application.
 
-## Structure
+## The AutoMom Back End (Server)
 
-This template follows the standard project structure in Rails 4.
+The AutoMom back end is a Rails application which supports RESTful requests
+from the AutoMom client. The API for the back-end application are:
 
-`curl` command scripts are stored in [`scripts`](scripts) with names that
-correspond to API actions.
-
-User authentication is built-in.
-
-## Tasks
-
-Developers should run these often!
-
--   `bin/rake routes` lists the endpoints available in your API.
--   `bin/rake test` runs automated tests.
--   `bin/rails console` opens a REPL that pre-loads the API.
--   `bin/rails db` opens your database client and loads the correct database.
--   `bin/rails server` starts the API.
--   `scripts/*.sh` run various `curl` commands to test the API. See below.
-
-<!-- TODO -   `rake nag` checks your code style. -->
-<!-- TODO -   `rake lint` checks your code for syntax errors. -->
-
-## API
-
-Use this as the basis for your own API documentation. Add a new third-level
-heading for your custom entities, and follow the pattern provided for the
-built-in user authentication documentation.
-
-Scripts are included in [`scripts`](scripts) to test built-in actions. Add your
-own scripts to test your custom API. As an alternative, you can write automated
-tests in RSpec to test your API.
-
-### Authentication
+### API end-points
 
 | Verb   | URI Pattern            | Controller#Action |
 |--------|------------------------|-------------------|
 | POST   | `/sign-up`             | `users#signup`    |
 | POST   | `/sign-in`             | `users#signin`    |
-| PATCH  | `/change-password/:id` | `users#changepw`  |
 | DELETE | `/sign-out/:id`        | `users#signout`   |
+| PATCH  | `/change-password/:id` | `users#changepw`  |
+| GET    | `/chores`              | `chores#index`    |
+| POST   | `/chores`              | `chores#create`   |
+| GET    | `/chores/:id`          | `chores#show`     |
+| PATCH  | `/chores/:id`          | `chores#update`   |
+| DELETE | `/chores/:id`          | `chores#delete`   |
 
-#### POST /sign-up
+The backend uses a Postgres database to store user information. In communicating
+with the database, I did not set up tables or joins directly; I used the Rails ORM to do that.
 
-Request:
+The app currently has two tables -- one for users, and one for chores. I created
+a migration to create a foreign key on the chores table to link individual chores
+with their users.
 
-```sh
-curl http://localhost:4741/sign-up \
-  --include \
-  --request POST \
-  --header "Content-Type: application/json" \
-  --data '{
-    "credentials": {
-      "email": "'"${EMAIL}"'",
-      "password": "'"${PASSWORD}"'",
-      "password_confirmation": "'"${PASSWORD}"'"
-    }
-  }'
-```
+## Approach to building AutoMom
 
-```sh
-EMAIL=ava@bob.com PASSWORD=hannah scripts/sign-up.sh
-```
+I approached building AutoMom very differently than my Tic-Tac-Toe project.
 
-Response:
+I first wrote down a checklist of each basic feature, in two categories: Auth
+functions (for letting users sign in and out, etc.) and CRUD functions (for
+letting users create, read, update, and delete chores).
 
-```md
-HTTP/1.1 201 Created
-Content-Type: application/json; charset=utf-8
+I started with Auth as those functions are largely built in the Rails API template
+provided by GA. I used the front-end auth code that I had working from Tic-Tac-Toe,
+which communicated with a back-end Rails app based on the same API. I was able to get Auth
+functions working fairly easily.
 
-{
-  "user": {
-    "id": 1,
-    "email": "ava@bob.com"
-  }
-}
-```
+I then moved on to the CRUD functions. Here, the backend was not already built for us,
+so I used `rails generate` to generate resources, and ran through a procedure that I
+followed for each resource I built. Here's an example:
 
-#### POST /sign-in
+### Chores
 
-Request:
+1. Scaffold chore resource *DONE*
+2. Run bin/rails db:migrate *DONE*
+3. Test that you can add a chore via rails console *DONE*
+4. Test that you can add a chore via a curl request *DONE*
+5. Test that you can return all of a user's chores via a curl request *DONE*
+6. Test that you can update a chore via a curl request *DONE*
+7. Test that you can delete a chore via a curl request *DONE*
 
-```sh
-curl http://localhost:4741/sign-in \
-  --include \
-  --request POST \
-  --header "Content-Type: application/json" \
-  --data '{
-    "credentials": {
-      "email": "'"${EMAIL}"'",
-      "password": "'"${PASSWORD}"'"
-    }
-  }'
-```
+(To see my complete project checklist, see [AutoMom Project Checklist](https://github.com/lisawilliams/auto-mom-front/blob/master/checklist.md))
 
-```sh
-EMAIL=ava@bob.com PASSWORD=hannah scripts/sign-in.sh
-```
+One of the places where I struggled the most was in creating a foreign key on the chores
+table. I generated a migration file using Rails -- but I did it twice. After deleting one,
+I found that Rails was looking for the one I deleted! Jordan A. helped me recover the deleted
+migration file via Git, and once that was done, it worked. Lesson: don't run `bin/rails db:migrate` twice
+without checking first.
 
-Response:
+## User Stories
 
-```md
-HTTP/1.1 200 OK
-Content-Type: application/json; charset=utf-8
+* Users want to sign up
+* Users want to sign in
+* Users want to sign out
+* Users want to change their password
 
-{
-  "user": {
-    "id": 1,
-    "email": "ava@bob.com",
-    "token": "BAhJIiVlZDIwZTMzMzQzODg5NTBmYjZlNjRlZDZlNzYxYzU2ZAY6BkVG--7e7f77f974edcf5e4887b56918f34cd9fe293b9f"
-  }
-}
-```
+* Users want to see a list of their current chores, with directions and days of week those chores are performed;
+* Users want to create new chore reminders;
+* Users want to update a chore to change the directions, title, or day of week it is performed
+* Users want to delete a chore when it is no longer relevant.
 
-#### PATCH /change-password/:id
 
-Request:
+## Wireframes
 
-```sh
-curl --include --request PATCH "http://localhost:4741/change-password/$ID" \
-  --header "Authorization: Token token=$TOKEN" \
-  --header "Content-Type: application/json" \
-  --data '{
-    "passwords": {
-      "old": "'"${OLDPW}"'",
-      "new": "'"${NEWPW}"'"
-    }
-  }'
-```
+[Here is a link to a wireframe I drew for AutoMom](https://github.com/lisawilliams/auto-mom-front/blob/development/Auto-Mom-Wireframe.jpg).
 
-```sh
-ID=1 OLDPW=hannah NEWPW=elle TOKEN=BAhJIiVlZDIwZTMzMzQzODg5NTBmYjZlNjRlZDZlNzYxYzU2ZAY6BkVG--7e7f77f974edcf5e4887b56918f34cd9fe293b9f scripts/change-password.sh
-```
+## Link to Live, Deployed AutoMom App
 
-Response:
+[AutoMom Deployed App](https://lisawilliams.github.io/auto-mom-front/)
 
-```md
-HTTP/1.1 204 No Content
-```
+## Link to Front And Back End Responsive
 
-#### DELETE /sign-out/:id
-
-Request:
-
-```sh
-curl http://localhost:4741/sign-out/$ID \
-  --include \
-  --request DELETE \
-  --header "Authorization: Token token=$TOKEN"
-```
-
-```sh
-ID=1 TOKEN=BAhJIiVlZDIwZTMzMzQzODg5NTBmYjZlNjRlZDZlNzYxYzU2ZAY6BkVG--7e7f77f974edcf5e4887b56918f34cd9fe293b9f scripts/sign-out.sh
-```
-
-Response:
-
-```md
-HTTP/1.1 204 No Content
-```
-
-### Users
-
-| Verb | URI Pattern | Controller#Action |
-|------|-------------|-------------------|
-| GET  | `/users`    | `users#index`     |
-| GET  | `/users/1`  | `users#show`      |
-
-#### GET /users
-
-Request:
-
-```sh
-curl http://localhost:4741/users \
-  --include \
-  --request GET \
-  --header "Authorization: Token token=$TOKEN"
-```
-
-```sh
-TOKEN=BAhJIiVlZDIwZTMzMzQzODg5NTBmYjZlNjRlZDZlNzYxYzU2ZAY6BkVG--7e7f77f974edcf5e4887b56918f34cd9fe293b9f scripts/users.sh
-```
-
-Response:
-
-```md
-HTTP/1.1 200 OK
-Content-Type: application/json; charset=utf-8
-
-{
-  "users": [
-    {
-      "id": 2,
-      "email": "bob@ava.com"
-    },
-    {
-      "id": 1,
-      "email": "ava@bob.com"
-    }
-  ]
-}
-```
-
-#### GET /users/:id
-
-Request:
-
-```sh
-curl --include --request GET http://localhost:4741/users/$ID \
-  --header "Authorization: Token token=$TOKEN"
-```
-
-```sh
-ID=2 TOKEN=BAhJIiVlZDIwZTMzMzQzODg5NTBmYjZlNjRlZDZlNzYxYzU2ZAY6BkVG--7e7f77f974edcf5e4887b56918f34cd9fe293b9f scripts/user.sh
-```
-
-Response:
-
-```md
-HTTP/1.1 200 OK
-Content-Type: application/json; charset=utf-8
-
-{
-  "user": {
-    "id": 2,
-    "email": "bob@ava.com"
-  }
-}
-```
-
-### Reset Database without dropping
-
-This is not a task developers should run often, but it is sometimes necessary.
-
-**locally**
-
-```sh
-bin/rake db:migrate VERSION=0
-bin/rake db:migrate db:seed db:examples
-```
-
-**heroku**
-
-```sh
-heroku run rake db:migrate VERSION=0
-heroku run rake db:migrate db:seed db:examples
-```
-
-## [License](LICENSE)
-
-1.  All content is licensed under a CC­BY­NC­SA 4.0 license.
-1.  All software code is licensed under GNU GPLv3. For commercial use or
-    alternative licensing, please contact legal@ga.co.
+[AutoMom Front End](https://github.com/lisawilliams/auto-mom-front)

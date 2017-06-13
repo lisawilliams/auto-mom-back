@@ -28,6 +28,7 @@ class ChoresController < OpenReadController
 
   # PATCH/PUT /chores/1
   def update
+# binding.pry
     if @chore.update(chore_params)
       render json: @chore
     else
