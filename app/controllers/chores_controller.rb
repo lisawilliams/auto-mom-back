@@ -1,5 +1,7 @@
+
 class ChoresController < OpenReadController
-  before_action :set_chore, only: [:show, :update, :destroy]
+  # before_action :set_chore, only: [:show, :update, :destroy]
+  before_action :set_chore, only: [:update, :destroy]
 
   # GET /chores
   def index
@@ -16,7 +18,6 @@ class ChoresController < OpenReadController
   # POST /chores
   def create
     # @chore = Chore.new(chore_params)
-
     @chore = current_user.chores.build(chore_params)
 
     if @chore.save
@@ -44,7 +45,9 @@ class ChoresController < OpenReadController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_chore
-      @chore = Chore.find(params[:id])
+      # @chore = Chore.find(params[:id])
+      @chore = current_user.chores.find(params[:id])
+
     end
 
     # Only allow a trusted parameter "white list" through.
